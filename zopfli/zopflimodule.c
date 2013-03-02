@@ -1,4 +1,4 @@
-#define PY_SSIZE_T_CLEAN 
+#define PY_SSIZE_T_CLEAN size_t
 #include <Python.h>
 #include <stdlib.h>
 #include "zlib_container.h"
@@ -11,8 +11,8 @@ zopfli_compress(PyObject *self, PyObject *args, PyObject *keywrds)
 {
   const unsigned char *in;
   unsigned char *in2, *out;
-  size_t insize; 
-  size_t outsize;  
+  size_t insize=0; 
+  size_t outsize=0;  
   Options options;
   InitOptions(&options);
   options.verbose = 0;
@@ -21,7 +21,7 @@ zopfli_compress(PyObject *self, PyObject *args, PyObject *keywrds)
   options.blocksplittinglast = 0;
   options.blocksplittingmax = 15;
   int gzip_mode = 0;
-  static char *kwlist[] = {"verbose", "numiterations", "blocksplitting", "blocksplittinglast", "blocksplittingmax", "gzip_mode", NULL};
+  static char *kwlist[] = {"data", "verbose", "numiterations", "blocksplitting", "blocksplittinglast", "blocksplittingmax", "gzip_mode", NULL};
   
   if (!PyArg_ParseTupleAndKeywords(args, keywrds, "s#|iiiiii", kwlist, &in, &insize,
 				   &options.verbose,
@@ -31,7 +31,6 @@ zopfli_compress(PyObject *self, PyObject *args, PyObject *keywrds)
 				   &options.blocksplittingmax,
 				   &gzip_mode))
     return NULL;
-  printf("Num iterations: %d\n", options.numiterations);
 
   Py_BEGIN_ALLOW_THREADS
     
@@ -67,7 +66,7 @@ static char docstring[] = ""
 static PyObject *ZopfliError;
 
 static PyMethodDef ZopfliMethods[] = {
-  { "compress", zopfli_compress, METH_VARARGS | METH_KEYWORDS, docstring},
+  { "compress", zopfli_compress,  METH_KEYWORDS, docstring},
 
   { NULL, NULL, 0, NULL}
 };
