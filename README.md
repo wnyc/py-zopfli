@@ -18,7 +18,10 @@ pyzopfli is a straight forward wrapper around [zopfli's][zopfli]'s ZlibCompress 
 pyzopfli also wrapps GzipCompress, but the API point does not try to mimic the gzip module. 
 
     from zopfli.gzip import compress 
-    print gzip.open(StringIO(compress(s))).read()
+    from StringIO import StringIO
+    from gzip import GzipFile
+    print GzipFile(fileobj=StringIO(compress("Hello World!"))).read()
+
 
 [zopfli]: http://googledevelopers.blogspot.com/2013/02/compress-data-more-densely-with-zopfli.html
 
