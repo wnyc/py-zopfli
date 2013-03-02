@@ -15,8 +15,7 @@ pyzopfil is a straight forward wrapper around [zopfli's][zopfli]'s ZlibCompress 
     print decompress(compress(s))
     
 
-[zopfli]: http://googledevelopers.blogspot.com/2013/02/compress-data-more-densely-with-zopfli.html
-Google's announcement of zopfli
+[zopfli]: http://googledevelopers.blogspot.com/2013/02/compress-data-more-densely-with-zopfli.html Google's announcement of Zopfli
 
 TODO
 ====
