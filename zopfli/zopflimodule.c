@@ -7,45 +7,6 @@
 
 
 static PyObject *
-zopfli_zlib_compress(PyObject *self, PyObject *args, PyObject *keywrds)
-{
-  const unsigned char *in;
-  unsigned char *in2, *out;
-  size_t insize; 
-  size_t outsize;  
-  Options options;
-  InitOptions(&options);
-  options.verbose = 0;
-  options.numiterations = 15;
-  options.blocksplitting = 1;
-  options.blocksplittinglast = 0;
-  options.blocksplittingmax = 15;
-  static char *kwlist[] = {"verbose", "numiterations", "blocksplitting", "blocksplittinglast", "blocksplittingmax", NULL};
-  
-  if (!PyArg_ParseTupleAndKeywords(args, keywrds, "s#|iiiii", kwlist, &in, &insize,
-				   &options.verbose,
-				   &options.numiterations,
-				   &options.blocksplitting,
-				   &options.blocksplittinglast,
-				   &options.blocksplittingmax))
-    return NULL;
-
-  Py_BEGIN_ALLOW_THREADS
-    
-  in2 = malloc(insize);
-  memcpy(in2, in, insize);
-  ZlibCompress(&options, in2, insize, &out, &outsize);
-  
-  free(in2);
-  Py_END_ALLOW_THREADS
-  
-  PyObject *returnValue;
-  returnValue = Py_BuildValue("s#", out, outsize);
-  free(out);
-  return returnValue;
-}
-
-static PyObject *
 zopfli_compress(PyObject *self, PyObject *args, PyObject *keywrds)
 {
   const unsigned char *in;
@@ -70,6 +31,7 @@ zopfli_compress(PyObject *self, PyObject *args, PyObject *keywrds)
 				   &options.blocksplittingmax,
 				   &gzip_mode))
     return NULL;
+  printf("Num iterations: %d\n", options.numiterations);
 
   Py_BEGIN_ALLOW_THREADS
     
@@ -91,21 +53,21 @@ zopfli_compress(PyObject *self, PyObject *args, PyObject *keywrds)
 }
 
 
-static char[] docstring = """
-zopfli.zopfli.compress applies zopfli zip or gzip compression to an obj.
+static char docstring[] = "" 
+  "zopfli.zopfli.compress applies zopfli zip or gzip compression to an obj." 
+  "" \
+  "zopfli.zopfli.compress("
+  "  s, **kwargs, verbose=0, numiterations=15, blocksplitting=1, "
+  "  blocksplittinglast=0, blocksplittingmax=15, gzip_mode=0)"
+  ""
+  "If gzip_mode is set to a non-zero value, a Gzip compatbile container will "
+  "be generated, otherwise a zlib compatible container will be generated. ";
 
-zopfli.zopfli.compress(
-  s, **kwargs, verbose=0, numiterations=15, blocksplitting=1, 
-  blocksplittinglast=0, blocksplittingmax=15, gzip_mode=0)
-
-If gzip_mode is set to a non-zero value, a Gzip compatbile container will 
-be generated, otherwise a zlib compatible container will be generated. 
-""";
 
 static PyObject *ZopfliError;
 
 static PyMethodDef ZopfliMethods[] = {
-  { "compress", zopfli_compress, METH_VARARGS, docstring},
+  { "compress", zopfli_compress, METH_VARARGS | METH_KEYWORDS, docstring},
 
   { NULL, NULL, 0, NULL}
 };
