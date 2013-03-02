@@ -7,13 +7,18 @@ cPython bindings for [zopfli][zopfli].
 USAGE
 =====
 
-pyzopfil is a straight forward wrapper around [zopfli's][zopfli]'s ZlibCompress method.
+pyzopfli is a straight forward wrapper around [zopfli's][zopfli]'s ZlibCompress method.
 
     from zopfli.zlib import compress
     from zlib import decompress
     s = 'Hello World'
     print decompress(compress(s))
     
+
+pyzopfli also wrapps GzipCompress, but the API point does not try to mimic the gzip module. 
+
+    from zopfli.gzip import compress 
+    print gzip.open(StringIO(compress(s))).read()
 
 [zopfli]: http://googledevelopers.blogspot.com/2013/02/compress-data-more-densely-with-zopfli.html
 
