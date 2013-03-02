@@ -1,3 +1,4 @@
+#define PY_SSIZE_T_CLEAN 
 #include <Python.h>
 #include <stdlib.h>
 #include "zlib_container.h"
@@ -10,8 +11,8 @@ zopfli_zlib_compress(PyObject *self, PyObject *args, PyObject *keywrds)
 {
   const unsigned char *in;
   unsigned char *in2, *out;
-  size_t insize = 0; 
-  size_t outsize = 0;  
+  size_t insize; 
+  size_t outsize;  
   Options options;
   InitOptions(&options);
   options.verbose = 0;
