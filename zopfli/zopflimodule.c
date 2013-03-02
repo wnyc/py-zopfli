@@ -6,16 +6,12 @@
 
 
 static PyObject *
-zopfli_zlib_compress(PyObject *self, PyObject *args)
+zopfli_zlib_compress(PyObject *self, PyObject *args, PyObject *keywrds)
 {
   const unsigned char *in;
   unsigned char *in2, *out;
-  size_t insize=0; 
-  size_t outsize=0;  
-  if (!PyArg_ParseTuple(args, "s#", &in, &insize))
-    return NULL;
-  Py_BEGIN_ALLOW_THREADS
-    
+  size_t insize = 0; 
+  size_t outsize = 0;  
   Options options;
   InitOptions(&options);
   options.verbose = 0;
@@ -23,6 +19,18 @@ zopfli_zlib_compress(PyObject *self, PyObject *args)
   options.blocksplitting = 1;
   options.blocksplittinglast = 0;
   options.blocksplittingmax = 15;
+  static char *kwlist[] = {"verbose", "numiterations", "blocksplitting", "blocksplittinglast", "blocksplittingmax", NULL};
+  
+  if (!PyArg_ParseTupleAndKeywords(args, keywrds, "s#|iiiii", kwlist, &in, &insize,
+				   &options.verbose,
+				   &options.numiterations,
+				   &options.blocksplitting,
+				   &options.blocksplittinglast,
+				   &options.blocksplittingmax))
+    return NULL;
+
+  Py_BEGIN_ALLOW_THREADS
+    
   in2 = malloc(insize);
   memcpy(in2, in, insize);
   ZlibCompress(&options, in2, insize, &out, &outsize);
@@ -37,16 +45,12 @@ zopfli_zlib_compress(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-zopfli_gzip_compress(PyObject *self, PyObject *args)
+zopfli_compress(PyObject *self, PyObject *args, PyObject *keywrds)
 {
   const unsigned char *in;
   unsigned char *in2, *out;
-  size_t insize=0; 
-  size_t outsize=0;  
-  if (!PyArg_ParseTuple(args, "s#", &in, &insize))
-    return NULL;
-  Py_BEGIN_ALLOW_THREADS
-    
+  size_t insize; 
+  size_t outsize;  
   Options options;
   InitOptions(&options);
   options.verbose = 0;
@@ -54,9 +58,27 @@ zopfli_gzip_compress(PyObject *self, PyObject *args)
   options.blocksplitting = 1;
   options.blocksplittinglast = 0;
   options.blocksplittingmax = 15;
+  int gzip_mode = 0;
+  static char *kwlist[] = {"verbose", "numiterations", "blocksplitting", "blocksplittinglast", "blocksplittingmax", "gzip_mode", NULL};
+  
+  if (!PyArg_ParseTupleAndKeywords(args, keywrds, "s#|iiiiii", kwlist, &in, &insize,
+				   &options.verbose,
+				   &options.numiterations,
+				   &options.blocksplitting,
+				   &options.blocksplittinglast,
+				   &options.blocksplittingmax,
+				   &gzip_mode))
+    return NULL;
+
+  Py_BEGIN_ALLOW_THREADS
+    
   in2 = malloc(insize);
   memcpy(in2, in, insize);
-  GzipCompress(&options, in2, insize, &out, &outsize);
+
+  if (!gzip_mode) 
+    ZlibCompress(&options, in2, insize, &out, &outsize);
+  else 
+    GzipCompress(&options, in2, insize, &out, &outsize);
   
   free(in2);
   Py_END_ALLOW_THREADS
@@ -68,11 +90,21 @@ zopfli_gzip_compress(PyObject *self, PyObject *args)
 }
 
 
+static char[] docstring = """
+zopfli.zopfli.compress applies zopfli zip or gzip compression to an obj.
+
+zopfli.zopfli.compress(
+  s, **kwargs, verbose=0, numiterations=15, blocksplitting=1, 
+  blocksplittinglast=0, blocksplittingmax=15, gzip_mode=0)
+
+If gzip_mode is set to a non-zero value, a Gzip compatbile container will 
+be generated, otherwise a zlib compatible container will be generated. 
+""";
+
 static PyObject *ZopfliError;
 
 static PyMethodDef ZopfliMethods[] = {
-  { "zlib", zopfli_zlib_compress, METH_VARARGS, "Perform zlib compression" },
-  { "gzip", zopfli_gzip_compress, METH_VARARGS, "Perform gzip compression" },
+  { "compress", zopfli_compress, METH_VARARGS, docstring},
 
   { NULL, NULL, 0, NULL}
 };
