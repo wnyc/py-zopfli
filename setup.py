@@ -10,7 +10,7 @@ from setuptools import setup, Extension
 
 setup(
     name='zopfli',
-    version='0.0.0',
+    version='0.0.2',
     author='Adam DePrince',
     author_email='adeprince@nypublicradio.org',
     description='Zopfli module for python',
