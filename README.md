@@ -1,18 +1,28 @@
 PYZOPFLI
 ========
 
-C Python bindings for zopfli.
+cPython bindings for [zopfli][zopfli].
 
 
 USAGE
 =====
 
+pyzopfil is a straight forward wrapper around [zopfli's][zopfli]'s ZlibCompress method.
 
-import zopfli.zlib
-import zlib
+    from zopfli.zlib import compress
+    from zlib import decompress
+    s = 'Hello World'
+    print decompress(compress(s))
+    
 
-s = 'Hello World'
+[zopfli]: http://googledevelopers.blogspot.com/2013/02/compress-data-more-densely-with-zopfli.html
+Google's announcement of zopfli
 
-print zlib.decompress(zopfli.zlib.compress(s))
-# You can also say zopfli.gzip.compress(s), but zopfli isn't gzip compatible yet                                                                                          
+TODO
+====
+
+* Support zopfli parameters
+
+* Monkey patch zlib and gzip so code with an overly tight binding can
+  be easily modified to use zopfli.
 
