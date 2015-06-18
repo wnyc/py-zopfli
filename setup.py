@@ -50,7 +50,7 @@ setup(
         ],
     scripts = [
         ],
-    url = "https://github.com/wnyc/pyzopfli",
+    url = "https://github.com/wnyc/py-zopfli",
     install_requires = [
         ]
 )
