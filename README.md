@@ -30,7 +30,7 @@ parmaters are treated as expected, 0 and >0 as false and true.
 
 * *numiterations*   Maximum amount of times to rerun forward and backward pass to optimize LZ77
   compression cost. Good values: 10, 15 for small files, 5 for files over
-  several MB in size or it will be too slow.
+  several MB in size or it will be too slow. Default value: 15.
 
 * *blocksplitting*  If true, splits the data in multiple deflate blocks with optimal choice
   for the block boundaries. Block splitting gives better compression. Default:
