@@ -1,9 +1,9 @@
 #define PY_SSIZE_T_CLEAN size_t
 #include <Python.h>
 #include <stdlib.h>
-#include "zlib_container.h"
-#include "gzip_container.h"
-#include "util.h"
+#include "../zopfli/src/zopfli/zlib_container.h"
+#include "../zopfli/src/zopfli/gzip_container.h"
+#include "../zopfli/src/zopfli/util.h"
 
 
 static PyObject *
@@ -12,40 +12,40 @@ zopfli_compress(PyObject *self, PyObject *args, PyObject *keywrds)
   const unsigned char *in;
   unsigned char *in2, *out;
   size_t insize=0; 
-  size_t outsize=0;  
-  Options options;
-  InitOptions(&options);
+  size_t outsize=0;
+  ZopfliOptions options;
+  int gzip_mode = 0;
+  static char *kwlist[] = {"data", "verbose", "numiterations", "blocksplitting", "blocksplittinglast", "blocksplittingmax", "gzip_mode", NULL};
+  PyObject *returnValue;
+
+  ZopfliInitOptions(&options);
   options.verbose = 0;
   options.numiterations = 15;
   options.blocksplitting = 1;
   options.blocksplittinglast = 0;
   options.blocksplittingmax = 15;
-  int gzip_mode = 0;
-  static char *kwlist[] = {"data", "verbose", "numiterations", "blocksplitting", "blocksplittinglast", "blocksplittingmax", "gzip_mode", NULL};
   
   if (!PyArg_ParseTupleAndKeywords(args, keywrds, "s#|iiiiii", kwlist, &in, &insize,
-				   &options.verbose,
-				   &options.numiterations,
-				   &options.blocksplitting,
-				   &options.blocksplittinglast,
-				   &options.blocksplittingmax,
-				   &gzip_mode))
+                                   &options.verbose,
+                                   &options.numiterations,
+                                   &options.blocksplitting,
+                                   &options.blocksplittinglast,
+                                   &options.blocksplittingmax,
+                                   &gzip_mode))
     return NULL;
 
   Py_BEGIN_ALLOW_THREADS
-    
   in2 = malloc(insize);
   memcpy(in2, in, insize);
 
   if (!gzip_mode) 
-    ZlibCompress(&options, in2, insize, &out, &outsize);
+    ZopfliZlibCompress(&options, in2, insize, &out, &outsize);
   else 
-    GzipCompress(&options, in2, insize, &out, &outsize);
+    ZopfliGzipCompress(&options, in2, insize, &out, &outsize);
   
   free(in2);
   Py_END_ALLOW_THREADS
-  
-  PyObject *returnValue;
+
   returnValue = Py_BuildValue("s#", out, outsize);
   free(out);
   return returnValue;
@@ -66,7 +66,7 @@ static char docstring[] = ""
 static PyObject *ZopfliError;
 
 static PyMethodDef ZopfliMethods[] = {
-  { "compress", zopfli_compress,  METH_KEYWORDS, docstring},
+  { "compress", (PyCFunction)zopfli_compress,  METH_KEYWORDS, docstring},
 
   { NULL, NULL, 0, NULL}
 };
