@@ -43,5 +43,6 @@ setup(
         'Topic :: System :: Archiving :: Compression',
         ],
     url = "https://github.com/wnyc/py-zopfli",
+    test_suite="tests",
 )
 
