@@ -42,6 +42,6 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Topic :: System :: Archiving :: Compression',
         ],
-    url = "https://github.com/wnyc/pyzopfli",
+    url = "https://github.com/wnyc/py-zopfli",
 )
 
