@@ -1,10 +1,15 @@
 #define PY_SSIZE_T_CLEAN size_t
 #include <Python.h>
+#include <bytesobject.h>
 #include <stdlib.h>
 #include "../zopfli/src/zopfli/zlib_container.h"
 #include "../zopfli/src/zopfli/gzip_container.h"
 #include "../zopfli/src/zopfli/util.h"
 
+#if PY_MAJOR_VERSION >= 3
+#define PyInt_Check PyLong_Check
+#define PyInt_AsLong PyLong_AsLong
+#endif
 
 static PyObject *
 zopfli_compress(PyObject *self, PyObject *args, PyObject *keywrds)
@@ -46,13 +51,12 @@ zopfli_compress(PyObject *self, PyObject *args, PyObject *keywrds)
   free(in2);
   Py_END_ALLOW_THREADS
 
-  returnValue = Py_BuildValue("s#", out, outsize);
+  returnValue = PyBytes_FromStringAndSize((char*)out, outsize);
   free(out);
   return returnValue;
 }
 
-
-static char docstring[] = "" 
+PyDoc_STRVAR(compress__doc__,
   "zopfli.zopfli.compress applies zopfli zip or gzip compression to an obj." 
   "" \
   "zopfli.zopfli.compress("
@@ -60,29 +64,48 @@ static char docstring[] = ""
   "  blocksplittinglast=0, blocksplittingmax=15, gzip_mode=0)"
   ""
   "If gzip_mode is set to a non-zero value, a Gzip compatbile container will "
-  "be generated, otherwise a zlib compatible container will be generated. ";
-
+  "be generated, otherwise a zlib compatible container will be generated. ");
 
 static PyObject *ZopfliError;
 
 static PyMethodDef ZopfliMethods[] = {
-  { "compress", (PyCFunction)zopfli_compress,  METH_KEYWORDS, docstring},
-
+  { "compress", (PyCFunction)zopfli_compress, METH_VARARGS | METH_KEYWORDS, compress__doc__},
   { NULL, NULL, 0, NULL}
 };
 
+PyDoc_STRVAR(zopfli__doc__,
+"Wrapper around zopfli's ZlibCompress and GzipCompress methods.");
 
-PyMODINIT_FUNC
-initzopfli(void)
-{
-  PyObject *m;
+#if PY_MAJOR_VERSION >= 3
+#define INIT_ZOPFLI   PyInit_zopfli
+#define CREATE_ZOPFLI PyModule_Create(&zopfli_module)
+#define RETURN_ZOPFLI return m
 
-  m = Py_InitModule("zopfli", ZopfliMethods);
-  if (m == NULL) 
-    return;
+static struct PyModuleDef zopfli_module = {
+  PyModuleDef_HEAD_INIT,
+  "zopfli",
+  zopfli__doc__,
+  0,
+  ZopfliMethods,
+  NULL,
+  NULL,
+  NULL
+};
+#else
+#define INIT_ZOPFLI   initzopfli
+#define CREATE_ZOPFLI Py_InitModule3("zopfli", ZopfliMethods, zopfli__doc__)
+#define RETURN_ZOPFLI return
+#endif
 
-  ZopfliError = PyErr_NewException("zopfli.error", NULL, NULL);
-  Py_INCREF(ZopfliError);
-  PyModule_AddObject(m, "error", ZopfliError);
+PyMODINIT_FUNC INIT_ZOPFLI(void) {
+  PyObject *m = CREATE_ZOPFLI;
+
+  ZopfliError = PyErr_NewException((char*) "zopfli.error", NULL, NULL);
+  if (ZopfliError != NULL) {
+    Py_INCREF(ZopfliError);
+    PyModule_AddObject(m, "error", ZopfliError);
+  }
+
+  RETURN_ZOPFLI;
 }
 
